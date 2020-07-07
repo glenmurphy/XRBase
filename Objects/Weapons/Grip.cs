@@ -9,8 +9,9 @@ public class Grip : XRBaseInteractable
     public Transform attachTransform;
 
     protected XRBaseInteractor interactor = null;
-    protected Weapon weapon;
+    protected TwoHanded parentObject;
 
+    private bool triggerButtonDown = false;
     private bool primaryButtonDown = false;
     private bool secondaryButtonDown = false;
 
@@ -24,43 +25,45 @@ public class Grip : XRBaseInteractable
             Debug.Log("No colliders for this grip");
         }
 
-        onActivate.AddListener(Activate);
-        onDeactivate.AddListener(Deactivate);
+        //onActivate.AddListener(Activate);
+        //onDeactivate.AddListener(Deactivate);
         onSelectEnter.AddListener(Grab);
         onSelectExit.AddListener(Drop);
     }
     
-    public void Setup(Weapon weapon) {
-        this.weapon = weapon;
+    public void Setup(TwoHanded parentObject) {
+        this.parentObject = parentObject;
     }
 
     public bool IsGrabbable() {
         // If we're currently being held, we're not grabbable
         if (interactor) return false;
-        if (weapon)
-            return weapon.IsGripGrabble(this);
+        if (parentObject)
+            return parentObject.IsGripGrabble(this);
 
         return true;
     }
 
+    /*
     protected virtual void Activate(XRBaseInteractor handInteractor) {
-        weapon.GripActivated(this);
+        parentObject.GripActivated(this);
     }
 
     protected virtual void Deactivate(XRBaseInteractor handInteractor) {
-        weapon.GripDeactivated(this);
+        parentObject.GripDeactivated(this);
     }
+    */
 
     protected virtual void Grab(XRBaseInteractor handInteractor) {
         if (interactor) return;
        
         interactor = handInteractor;
-        weapon.Grabbed(this);
+        parentObject.Grabbed(this);
     }
 
     protected void Drop(XRBaseInteractor handInteractor) {
         interactor = null;
-        weapon.Dropped(this);
+        parentObject.Dropped(this);
     }
 
     public void CheckDistance() {
@@ -88,25 +91,34 @@ public class Grip : XRBaseInteractable
     public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase) {
         base.ProcessInteractable(updatePhase);
         
-        if (interactor && weapon) {
+        if (interactor && parentObject) {
             InputDevice device = interactor.GetComponent<XRController>().inputDevice;
             bool pressed;
             if (device.TryGetFeatureValue(CommonUsages.primaryButton, out pressed)) {
                 if (pressed == true && primaryButtonDown == false) {
-                    weapon.ButtonPressed(this, InputHelpers.Button.PrimaryButton);
+                    parentObject.ButtonPressed(this, InputHelpers.Button.PrimaryButton);
                     primaryButtonDown = true;
                 } else if (pressed == false && primaryButtonDown == true) {
-                    weapon.ButtonReleased(this, InputHelpers.Button.PrimaryButton);
+                    parentObject.ButtonReleased(this, InputHelpers.Button.PrimaryButton);
                     primaryButtonDown = false;
                 }
             }
             if (device.TryGetFeatureValue(CommonUsages.secondaryButton, out pressed)) {
                 if (pressed == true && secondaryButtonDown == false) {
-                    weapon.ButtonPressed(this, InputHelpers.Button.SecondaryButton);
+                    parentObject.ButtonPressed(this, InputHelpers.Button.SecondaryButton);
                     secondaryButtonDown = true;
                 } else if (pressed == false && secondaryButtonDown == true) {
-                    weapon.ButtonReleased(this, InputHelpers.Button.SecondaryButton);
+                    parentObject.ButtonReleased(this, InputHelpers.Button.SecondaryButton);
                     secondaryButtonDown = false;
+                }
+            }
+            if (device.TryGetFeatureValue(CommonUsages.triggerButton, out pressed)) {
+                if (pressed == true && triggerButtonDown == false) {
+                    parentObject.ButtonPressed(this, InputHelpers.Button.Trigger);
+                    triggerButtonDown = true;
+                } else if (pressed == false && triggerButtonDown == true) {
+                    parentObject.ButtonReleased(this, InputHelpers.Button.Trigger);
+                    triggerButtonDown = false;
                 }
             }
         }

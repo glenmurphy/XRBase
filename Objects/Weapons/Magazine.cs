@@ -71,14 +71,6 @@ public class Magazine : XRGrabInteractable
         base.OnSelectEnter(handInteractor);
         Debug.Log("Grabbed");
         interactor = handInteractor;
-        /*
-        if (receiver != null) {
-            receiver = null;
-            rigidBody.isKinematic = false;
-            rigidBody.useGravity = true;
-            rigidBody.detectCollisions = true;
-        }
-        */
     }
 
     public bool IsHeld() {

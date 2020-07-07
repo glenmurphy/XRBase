@@ -55,17 +55,28 @@ namespace UnityEngine.XR.Interaction.Toolkit
             if (outline != null) outline.enabled = false;
         }
 
+        void FixedUpdate() {
+            /*
+            RaycastHit[] hits = Physics.ConeCastAll(transform.position, 1.0f, transform.forward, 0f, 45f);
+            foreach(RaycastHit hit in hits) {
+
+            }
+            */
+        }
+
         /// <summary>
         /// Retrieve the list of interactables that this interactor could possibly interact with this frame.
         /// Unlike other Interactors, Hand Interactor only allows one interactable to be valid at a time
         /// </summary>
         /// <param name="validTargets">Populated List of interactables that are valid for selection or hover.</param>
-        public override void GetValidTargets(List<XRBaseInteractable> validTargets) {
-            validTargets.Clear();
+        public override void GetValidTargets(List<XRBaseInteractable> outValidTargets) {
+            outValidTargets.Clear();
 
             float minDistance = Mathf.Infinity;
             XRBaseInteractable minObject = null;
 
+            // TODO, need to make this take into account proximity to the main axis so you can more easily select
+            // between things
             foreach(var interactable in m_ValidTargets) {
                 if (interactable is Grip) {
                     if (!((Grip)interactable).IsGrabbable()) {
@@ -78,8 +89,9 @@ namespace UnityEngine.XR.Interaction.Toolkit
                     minObject = interactable;
                 }
             }
+
             if (minObject) {
-                validTargets.Add(minObject);
+                outValidTargets.Add(minObject);
             }
         }
 

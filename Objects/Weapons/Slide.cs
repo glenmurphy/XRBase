@@ -40,13 +40,13 @@ public class Slide : Grip
     void Forward() {
         Debug.Log("Forward");
         state = State.Forward;
-        weapon.SlideForward();
+        parentObject.GripEvent(this, (int)State.Forward);
     }
     
     void Pulled() {
         Debug.Log("Pulled");
         state = State.Pulled;
-        weapon.SlidePulled();
+        parentObject.GripEvent(this, (int)State.Pulled);
     }
 
     void Pulling() {

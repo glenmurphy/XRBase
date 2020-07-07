@@ -44,25 +44,6 @@ public class TwoHanded : XRGrabInteractable
         return primaryGrip.IsHeld();
     }
 
-/*
-    public void GripActivated(Grip grip) {
-        Debug.Log("Grip Activated");
-        
-        if (grip == primaryGrip) {
-            triggerDown = true;
-            triggerDownTime = Time.time;
-        }
-    }
-
-    public void GripDeactivated(Grip grip) {
-        Debug.Log("Grip Deactivated");
-        if (grip == primaryGrip) {
-            triggerDown = false;
-            triggerDownTime = Time.time;
-        }
-    }
-    */
-
     public void Grabbed(Grip grip) {
         if (grip == primaryGrip) {
             attachTransform = grip.GetAttachTransform();
@@ -78,16 +59,14 @@ public class TwoHanded : XRGrabInteractable
     }
 
     private void SetTwoHandedTransform() {
-
         Vector3 primaryPosition = primaryGrip.GetInteractor().transform.position;
-
         Vector3 secondaryPosition = secondaryGrip.GetInteractor().transform.position;
 
         // TODO: handle offset grips (this code assumes the secondary grip is exactly forward of 
         // the primary grip). Can probably do this by modifying secondaryPosition with the offset,
         // but rotation becomes a weird factor.
-        // e.g secondaryPosition -= secondaryGrip.GetInteractor().transform.up * 0.02f + secondaryGrip.GetInteractor().transform.forward * 0.02f;
-
+        // e.g secondaryPosition -= secondaryGrip.GetInteractor().transform.up * 0.02f + 
+        // secondaryGrip.GetInteractor().transform.forward * 0.02f;
         Vector3 target = secondaryPosition - primaryPosition;
 
         Quaternion lookRotation = Quaternion.LookRotation(target);
@@ -102,6 +81,7 @@ public class TwoHanded : XRGrabInteractable
         transform.position = primaryPosition + (transform.position - attachTransform.position);
     }
 
+    /*
     private void SetOneHandedTransform() {
         XRBaseInteractor primaryHand = primaryGrip.GetInteractor();
 
@@ -119,6 +99,7 @@ public class TwoHanded : XRGrabInteractable
         transform.rotation = lookRotation;
         transform.position = primaryHand.transform.position + (transform.position - attachTransform.position);
     }
+    */
 
     public virtual void GripEvent(Grip grip, int data) {}
     public virtual void ButtonPressed(Grip grip, InputHelpers.Button button) {}
@@ -128,11 +109,17 @@ public class TwoHanded : XRGrabInteractable
         base.ProcessInteractable(updatePhase);
 
         if (primaryGrip.IsHeld()) {
-            if (secondaryGrip.IsHeld())
+            if (secondaryGrip.IsHeld()) {
                 SetTwoHandedTransform();
-            else
+            }
+            /*
+            else {
                 SetOneHandedTransform();
+            }
+            */
         }
+
+        // TODO: recoil transform
 
         // We do this later so we have a chance to catch up after player rotation etc, though 
         // other transforms (recoil) might cause us to revaluate this

@@ -52,9 +52,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
         void HoverUnhighlight(XRBaseInteractable interactable) {
             Outline outline = interactable.GetComponent<Outline>();
-            if (outline != null) {
-                outline.enabled = false;
-            }
+            if (outline != null) outline.enabled = false;
         }
 
         /// <summary>
@@ -69,6 +67,11 @@ namespace UnityEngine.XR.Interaction.Toolkit
             XRBaseInteractable minObject = null;
 
             foreach(var interactable in m_ValidTargets) {
+                if (interactable is Grip) {
+                    if (!((Grip)interactable).IsGrabbable()) {
+                        continue;
+                    }
+                }
                 float distance = interactable.GetDistanceSqrToInteractor(this);
                 if (distance < minDistance) {
                     minDistance = distance;

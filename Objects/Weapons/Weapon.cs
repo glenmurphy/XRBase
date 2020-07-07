@@ -72,6 +72,13 @@ public class Weapon : XRGrabInteractable
         }
     }
 
+    public bool IsGripGrabble(Grip grip) {
+        if (grip.IsHeld()) return false;
+        if (grip == primaryGrip) return true;
+
+        return primaryGrip.IsHeld();
+    }
+
     // We stop this from happening because we don't want people grabbing it by the regular
     // colliders
     protected override void OnSelectEnter(XRBaseInteractor interactor) { }

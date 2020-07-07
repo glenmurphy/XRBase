@@ -8,8 +8,7 @@ public class Grip : XRBaseInteractable
 {
     public Transform attachTransform;
 
-    private bool Held = false;
-    protected XRBaseInteractor interactor;
+    protected XRBaseInteractor interactor = null;
     protected Weapon weapon;
 
     private bool primaryButtonDown = false;
@@ -35,6 +34,15 @@ public class Grip : XRBaseInteractable
         this.weapon = weapon;
     }
 
+    public bool IsGrabbable() {
+        // If we're currently being held, we're not grabbable
+        if (interactor) return false;
+        if (weapon)
+            return weapon.IsGripGrabble(this);
+
+        return true;
+    }
+
     protected virtual void Activate(XRBaseInteractor handInteractor) {
         weapon.GripActivated(this);
     }
@@ -44,28 +52,25 @@ public class Grip : XRBaseInteractable
     }
 
     protected virtual void Grab(XRBaseInteractor handInteractor) {
-        if (Held) return;
+        if (interactor) return;
        
         interactor = handInteractor;
-        Held = true;
-        
         weapon.Grabbed(this);
     }
 
     protected void Drop(XRBaseInteractor handInteractor) {
         interactor = null;
-        Held = false;
         weapon.Dropped(this);
     }
 
     public void CheckDistance() {
-        if (Held && Vector3.Distance(interactor.attachTransform.position, attachTransform.position) > 0.25f) {
+        if (interactor && Vector3.Distance(interactor.attachTransform.position, attachTransform.position) > 0.25f) {
             OnSelectExit(interactor);
         }
     }
 
     public bool IsHeld() {
-        return Held;
+        return (interactor != null);
     }
 
     public XRBaseInteractor GetInteractor() {
@@ -83,7 +88,7 @@ public class Grip : XRBaseInteractable
     public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase) {
         base.ProcessInteractable(updatePhase);
         
-        if (Held && interactor && weapon) {
+        if (interactor && weapon) {
             InputDevice device = interactor.GetComponent<XRController>().inputDevice;
             bool pressed;
             if (device.TryGetFeatureValue(CommonUsages.primaryButton, out pressed)) {

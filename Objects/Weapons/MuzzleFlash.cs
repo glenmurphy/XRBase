@@ -5,6 +5,8 @@ using UnityEngine;
 public class MuzzleFlash : MonoBehaviour
 {
     private MeshRenderer meshRenderer;
+    private Light light;
+    private float defaultIntensity;
     private float shownAt = 0;
     private float showTime = 0.05f;
     private bool shownOnce = false; // whether its been shown for at least one frame
@@ -13,6 +15,9 @@ public class MuzzleFlash : MonoBehaviour
     void Start()
     {
         meshRenderer = GetComponent<MeshRenderer>();
+        light = GetComponent<Light>();
+        if (light)
+             defaultIntensity = light.intensity;
     }
 
     public void Flash() {
@@ -20,6 +25,10 @@ public class MuzzleFlash : MonoBehaviour
         transform.localScale = new Vector3(Random.Range(0.7f, 1.1f), Random.Range(0.7f, 1.1f), Random.Range(0.7f, 1.1f));
         transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-5f, 5f) + ((int)Random.Range(0, 4) * 90f));
         meshRenderer.enabled = true;
+        if (light) {
+            light.intensity = defaultIntensity;
+            light.enabled = true;
+        }
         shownOnce = false;
     }
 
@@ -29,8 +38,11 @@ public class MuzzleFlash : MonoBehaviour
         if (shownOnce) { 
             if (Time.time > shownAt + showTime) {
                 meshRenderer.enabled = false;
+                light.enabled = false;
             } else {
-                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 1f/showTime * Time.deltaTime);
+                float scale = 1f/showTime * Time.deltaTime;
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, scale);
+                light.intensity = Mathf.Lerp(light.intensity, 0, scale);
             }
         }
         shownOnce = true;

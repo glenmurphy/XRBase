@@ -10,7 +10,7 @@ public class Weapon : TwoHanded
 {
     public Slide slide;
     public Receiver receiver;
-    public GameObject bullet;
+    public GameObject bulletPrefab;
     public Transform bulletExit;
     public MuzzleFlash muzzleFlash;
 
@@ -87,7 +87,9 @@ public class Weapon : TwoHanded
             PlaySound(fireSoundList[(int)Random.Range(0, fireSoundList.Count)]);
         }
 
-        Rigidbody bulletrb = Instantiate(bullet, bulletExit.position, bulletExit.rotation).GetComponent<Rigidbody>();
+        Bullet bullet = Instantiate(bulletPrefab, bulletExit.position, bulletExit.rotation).GetComponent<Bullet>();
+        Rigidbody bulletrb = bullet.GetComponent<Rigidbody>();
+        
         bulletrb.velocity = bulletExit.forward * bulletSpeed;
         if (accuracy > 0) {
             Vector2 error = Random.insideUnitCircle * accuracy;
@@ -96,6 +98,8 @@ public class Weapon : TwoHanded
         } else {
             bulletrb.velocity = bulletExit.forward * bulletSpeed;
         }
+        bullet.Init(Time.time - time + Time.deltaTime); // Also advance it by one frame to hide lag
+
         muzzleFlash.Flash();
         firedTime = time;
         roundChambered = false;
@@ -151,11 +155,11 @@ public class Weapon : TwoHanded
                 }
                 return;
             }
-            float lastAction = Mathf.Max(triggerDownTime, firedTime + reloadTime);
+            float lastActionTime = Mathf.Max(triggerDownTime, firedTime + reloadTime);
             
-            while (lastAction <= Time.time || Mathf.Approximately(lastAction, Time.time)) {
-                TryFire(lastAction);
-                lastAction += reloadTime;
+            while (lastActionTime <= Time.time || Mathf.Approximately(lastActionTime, Time.time)) {
+                TryFire(lastActionTime);
+                lastActionTime += reloadTime;
             }
         }
     }

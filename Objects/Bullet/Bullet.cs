@@ -11,22 +11,26 @@ public class Bullet : MonoBehaviour
   private RaycastHit hit;
   private GameObject enemy;
   private Rigidbody rb;
-  //private Enemy enemyComponent;
+  private bool inited = false;
 
   // Start is called before the first frame update
-  void Start() {
+  void Awake() {
+    if (!inited) Init(0);
+  }
+
+  // We might want to instantly advance the state of the bullet on instantiation; this is so 
+  // we can pretend it's been fired in the past for when we're doing big bursts
+  public void Init(float advanceTime) {
     hit = new RaycastHit();
     rb = GetComponent<Rigidbody>();
 
     // Manually advance position by one frame because the bullet may have been created during
     // an Update(), causing all kinds of physics havok. We could use the firing time of the
     // weapon to position these more accurately as well.
-    // 
-    // Randomness is to add visual effect.
+
     lastPosition = transform.position;
-    Debug.Log(Time.fixedDeltaTime);
-    transform.position = transform.position + rb.velocity * (Time.deltaTime * (Random.value + 0.5f));
-    CheckCollisions();
+    transform.position = transform.position + rb.velocity * advanceTime;
+    Update();
 
     Destroy(this.gameObject, lifeTime);
   }

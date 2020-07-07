@@ -5,7 +5,7 @@ using UnityEngine;
 public class MuzzleFlash : MonoBehaviour
 {
     private MeshRenderer meshRenderer;
-    private Light light;
+    private Light lightFlash;
     private float defaultIntensity;
     private float shownAt = 0;
     private float showTime = 0.05f;
@@ -15,9 +15,9 @@ public class MuzzleFlash : MonoBehaviour
     void Start()
     {
         meshRenderer = GetComponent<MeshRenderer>();
-        light = GetComponent<Light>();
-        if (light)
-             defaultIntensity = light.intensity;
+        lightFlash = GetComponent<Light>();
+        if (lightFlash)
+             defaultIntensity = lightFlash.intensity;
     }
 
     public void Flash() {
@@ -25,9 +25,9 @@ public class MuzzleFlash : MonoBehaviour
         transform.localScale = new Vector3(Random.Range(0.7f, 1.1f), Random.Range(0.7f, 1.1f), Random.Range(0.7f, 1.1f));
         transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-5f, 5f) + ((int)Random.Range(0, 4) * 90f));
         meshRenderer.enabled = true;
-        if (light) {
-            light.intensity = defaultIntensity;
-            light.enabled = true;
+        if (lightFlash) {
+            lightFlash.intensity = defaultIntensity;
+            lightFlash.enabled = true;
         }
         shownOnce = false;
     }
@@ -38,11 +38,11 @@ public class MuzzleFlash : MonoBehaviour
         if (shownOnce) { 
             if (Time.time > shownAt + showTime) {
                 meshRenderer.enabled = false;
-                light.enabled = false;
+                lightFlash.enabled = false;
             } else {
                 float scale = 1f/showTime * Time.deltaTime;
                 transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, scale);
-                light.intensity = Mathf.Lerp(light.intensity, 0, scale);
+                lightFlash.intensity = Mathf.Lerp(lightFlash.intensity, 0, scale);
             }
         }
         shownOnce = true;

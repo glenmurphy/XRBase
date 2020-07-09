@@ -35,6 +35,10 @@ public class Grip : XRBaseInteractable
         this.parentObject = parentObject;
     }
 
+    public bool IsMagneticallyGrabbable() {
+        return (IsGrabbable() && parentObject.primaryGrip == this);
+    }
+
     public bool IsGrabbable() {
         // If we're currently being held, we're not grabbable
         if (interactor) return false;

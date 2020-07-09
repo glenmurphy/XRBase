@@ -21,11 +21,12 @@ public class Weapon : TwoHanded
     public AudioClip magAttachedSound;
     public AudioClip modeSwitchSound;
 
-    public float accuracy = 1f; // degrees of variance
+    public float accuracy = 4.5f; // degrees of variance
+    public float twoHandedAccuracy = 1.2f; // degrees of variance
     public float reloadTime = 0.05f;
     public float bulletSpeed = 200f;
     public bool automatic = true;
-    public bool toggleable = false;
+    public bool toggleable = true;
 
     private bool roundChambered = false;
     private float firedTime = 0;
@@ -91,8 +92,11 @@ public class Weapon : TwoHanded
         Rigidbody bulletrb = bullet.GetComponent<Rigidbody>();
         
         bulletrb.velocity = bulletExit.forward * bulletSpeed;
-        if (accuracy > 0) {
-            Vector2 error = Random.insideUnitCircle * accuracy;
+
+        // TODO: add a recoil model (two-handed reduces recoil and decreases recovery time)
+        float currentAccuracy = secondaryGrip.IsHeld() ? twoHandedAccuracy : accuracy;
+        if (currentAccuracy > 0) {
+            Vector2 error = Random.insideUnitCircle * currentAccuracy;
             Quaternion errorRotation = Quaternion.Euler(error.x, error.y, 0);
             bulletrb.velocity = errorRotation * bulletExit.forward * bulletSpeed;
         } else {

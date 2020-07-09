@@ -6,19 +6,32 @@ using UnityEngine.XR;
 public class Player : MonoBehaviour
 {
     // Configuration
+    [SerializeField]
+    [Tooltip("Use left stick for movement, right stick for snap turns")]
     public bool useLeftForMovement = true;
+
     public float speed = 2f;
     public bool useHand = true;
     public float gravity = -9.81f;
+
     public GameObject leftHand;
     public GameObject rightHand;
+ 
+    [SerializeField]
+    [Tooltip("Deadzone on controller joysticks for movement")]
     private float movementDeadzone = 0.1f;
+
+    [SerializeField]
+    [Tooltip("Determines how much the player is allowed to lean away from their body over obstacles")]
+    private float maxLean = 0.6f;
 
     // Mapped objects
     private List<InputDevice> devices;
     private InputDevice leftController;
     private InputDevice rightController;
     private CharacterController characterController;
+    private Camera headsetCamera;
+    private Rigidbody body;
 
     // Working variables
     private Vector3 direction;
@@ -27,8 +40,19 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        headsetCamera = GetComponentInChildren<Camera>();
         devices = new List<InputDevice>();
         characterController = GetComponent<CharacterController>();
+
+        body = GetComponentInChildren<Rigidbody>();
+
+        // Make sure the body has a larger collision radius than the character controller - if it
+        // doesn't, then the physics gets messed up
+        CapsuleCollider bodyCapsule = body.GetComponent<CapsuleCollider>();
+        if (bodyCapsule.radius < characterController.radius + characterController.skinWidth) {
+            bodyCapsule.radius = characterController.radius + characterController.skinWidth;
+        }
+
 
         if (leftHand == null)
             leftHand = transform.Find("Left Hand").gameObject;
@@ -71,6 +95,11 @@ public class Player : MonoBehaviour
             float magnitude = vec.magnitude;
             direction = movementTransform.TransformDirection(new Vector3(vec.x, 0, vec.y));
             direction = magnitude * Vector3.Normalize(Vector3.ProjectOnPlane(direction, Vector3.up));
+
+            // TODO: if the camera is "behind" the charactercontroller, move the character 
+            // controller center towards the player; this is so that if the player is leaning away
+            // from the direction of motion, the controller doesn't collide with things first
+
             characterController.Move(speed * Time.deltaTime * direction);
         }
     }
@@ -92,16 +121,56 @@ public class Player : MonoBehaviour
         }
     }
 
+    // This moves the body in the world, and allows the player to lean to a certain extent
+    void UpdateBodyPosition() {
+        // Figure out where the camera is
+        Vector3 cameraCenter = transform.InverseTransformPoint(headsetCamera.transform.position);
+
+        // Move the main body
+        Rigidbody body = GetComponentInChildren<Rigidbody>();
+        Vector3 newPosition = new Vector3(headsetCamera.transform.position.x, transform.position.y, headsetCamera.transform.position.z);
+        body.rotation = (Quaternion.identity);
+        body.MovePosition(Vector3.Lerp (body.transform.position, newPosition, Time.deltaTime * 10f));
+
+        // Update the charactercontroller
+        Vector3 headCenter = transform.InverseTransformPoint(headsetCamera.transform.position);
+        Vector3 bodyCenter = transform.InverseTransformPoint(body.position);
+
+        characterController.height = headsetCamera.transform.position.y - transform.position.y;
+        float distance = Vector3.Distance(new Vector3(bodyCenter.x, 0, bodyCenter.z), 
+                                          new Vector3(headCenter.x, 0, headCenter.z));
+
+        if (distance > maxLean) {
+            // Might need to blank out the display to prevent jerkiness, but the jerkiness
+            // probably helps motion sickness
+            float overage = distance - maxLean;
+            Vector3 controllerDestination = new Vector3(headCenter.x, characterController.height / 2f, headCenter.z);
+            characterController.center = Vector3.Lerp(
+                characterController.center, 
+                controllerDestination,
+                overage / distance);
+        } else {
+            characterController.center = new Vector3(bodyCenter.x, characterController.height / 2f, bodyCenter.z); 
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
         // Gravity
         characterController.Move(new Vector3(0, gravity, 0) * Time.deltaTime);
 
-        //if (leftController == null || rightController == null)
+        // if (leftController == null || rightController == null)
+        // TODO: figure out why sometimes the left controller doesn't map properly
         InitControls();
 
         RotatePlayer();
         MovePlayer();
+        
+    }
+
+    void FixedUpdate() {
+        // Here because physics
+        UpdateBodyPosition();
     }
 }

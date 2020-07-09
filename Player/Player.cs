@@ -16,6 +16,7 @@ public class Player : MonoBehaviour
 
     public GameObject leftHand;
     public GameObject rightHand;
+    public GameObject hips;
  
     [SerializeField]
     [Tooltip("Deadzone on controller joysticks for movement")]
@@ -122,21 +123,28 @@ public class Player : MonoBehaviour
 
     // This moves the body in the world, and allows the player to lean to a certain extent
     void UpdateBodyPosition() {
-        // Figure out where the camera is
-        Vector3 cameraCenter = transform.InverseTransformPoint(headsetCamera.transform.position);
-
-        // TODO: Guess where the body could be based on rotation+height of the head - this
-        // might allow for better sideways cover peeking
-
-        // Move the main body
         Rigidbody body = GetComponentInChildren<Rigidbody>();
-        Vector3 newPosition = new Vector3(headsetCamera.transform.position.x, transform.position.y, headsetCamera.transform.position.z);
+
+        // Figure out where the camera is
+        Vector3 neckPosition = headsetCamera.transform.position - headsetCamera.transform.up * 0.25f;
+
+        // TODO: Height
+        //body.transform.localScale = new Vector3(1, headsetCamera.transform.position.y - body.transform.position.y, 1);
+
+        // Move the main/lower body
+        Vector3 newPosition = new Vector3(neckPosition.x, transform.position.y, neckPosition.z);
         body.rotation = (Quaternion.identity);
         body.MovePosition(Vector3.Lerp (body.transform.position, newPosition, Time.deltaTime * 10f));
 
+        // Rotate the upper body towards the head
+        Vector3 upperBodyDirection = (neckPosition - hips.transform.position).normalized;
+        hips.transform.up = Vector3.Lerp(hips.transform.up, upperBodyDirection, Time.deltaTime * 10f);
+
         // Update the charactercontroller
-        Vector3 headCenter = transform.InverseTransformPoint(headsetCamera.transform.position);
-        Vector3 bodyCenter = transform.InverseTransformPoint(body.position);
+        // We do this in local coordinates because character controller center is set in local
+        // Need to watch if gravity becomes an issue
+        Vector3 headLocal = transform.InverseTransformPoint(neckPosition);
+        Vector3 bodyLocal = transform.InverseTransformPoint(body.position);
 
         // Set the height (TODO: this might not be necessary)
         characterController.height = headsetCamera.transform.position.y - transform.position.y;
@@ -144,8 +152,8 @@ public class Player : MonoBehaviour
         // Figure out how far away the body is from the head - as the body is constrained by physics
         // this will let us know if the player is moving away from game-physics limits (e.g. leaning)
         // over a wall.
-        float distance = Vector3.Distance(new Vector3(bodyCenter.x, 0, bodyCenter.z), 
-                                          new Vector3(headCenter.x, 0, headCenter.z));
+        float distance = Vector3.Distance(new Vector3(bodyLocal.x, 0, bodyLocal.z), 
+                                          new Vector3(headLocal.x, 0, headLocal.z));
 
         if (distance > maxLean) {
             // If the player is leaning too far, move the character controller towards the head. As
@@ -157,10 +165,10 @@ public class Player : MonoBehaviour
             float overage = distance - maxLean;
             characterController.center = Vector3.Lerp(
                 characterController.center, 
-                new Vector3(headCenter.x, characterController.height / 2f, headCenter.z),
+                new Vector3(headLocal.x, characterController.height / 2f, headLocal.z),
                 overage / distance);
         } else {
-            characterController.center = new Vector3(bodyCenter.x, characterController.height / 2f, bodyCenter.z); 
+            characterController.center = new Vector3(bodyLocal.x, characterController.height / 2f, bodyLocal.z); 
         }
     }
 

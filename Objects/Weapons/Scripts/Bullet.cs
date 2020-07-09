@@ -5,8 +5,6 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
   public float lifeTime = 1.4f;
-  public GameObject contactSmack;
-
   private Vector3 lastPosition;
   private RaycastHit hit;
   private GameObject enemy;
@@ -48,9 +46,13 @@ public class Bullet : MonoBehaviour
         hit.rigidbody.AddForceAtPosition(GetComponent<Rigidbody>().velocity, hit.point);
     }
     
+    SmackPool.Instance.Create(hit.point,
+            Quaternion.AngleAxis(Random.Range(0f,360f), hit.normal) * 
+            Quaternion.LookRotation(hit.normal));
+    /*        
     Instantiate(contactSmack, hit.point,
         Quaternion.AngleAxis(Random.Range(0f,360f), hit.normal) * 
-        Quaternion.LookRotation(hit.normal));
+        Quaternion.LookRotation(hit.normal));*/
     
     Destroy(this.gameObject);
   }

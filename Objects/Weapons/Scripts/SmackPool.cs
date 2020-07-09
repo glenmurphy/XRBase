@@ -12,7 +12,10 @@ public class SmackPool : MonoBehaviour
 
     void Awake() {
         if (Instance)
-            Debug.LogError("Smackpool already instantiated");
+        {
+            Debug.LogError("Smackpool already instantiated; make sure it's only on a single object");
+        }
+        
         if (!prefab) {
             Debug.LogWarning("SmackPool prefab not pre-defined");
             prefab = Resources.Load("Smack");

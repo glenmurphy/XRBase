@@ -26,7 +26,8 @@ public class Smack : MonoBehaviour
         this.transform.localScale = new Vector3(scale, scale, scale);
     }
 
-    public void Initiate(Vector3 position, Quaternion rotation) {
+    public void Initiate(Vector3 position, Quaternion rotation)
+    {
         gameObject.SetActive(true);
         transform.position = position;
         transform.rotation = rotation;

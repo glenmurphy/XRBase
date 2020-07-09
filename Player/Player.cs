@@ -53,7 +53,6 @@ public class Player : MonoBehaviour
             bodyCapsule.radius = characterController.radius + characterController.skinWidth;
         }
 
-
         if (leftHand == null)
             leftHand = transform.Find("Left Hand").gameObject;
         if (rightHand == null)
@@ -126,6 +125,9 @@ public class Player : MonoBehaviour
         // Figure out where the camera is
         Vector3 cameraCenter = transform.InverseTransformPoint(headsetCamera.transform.position);
 
+        // TODO: Guess where the body could be based on rotation+height of the head - this
+        // might allow for better sideways cover peeking
+
         // Move the main body
         Rigidbody body = GetComponentInChildren<Rigidbody>();
         Vector3 newPosition = new Vector3(headsetCamera.transform.position.x, transform.position.y, headsetCamera.transform.position.z);
@@ -136,18 +138,26 @@ public class Player : MonoBehaviour
         Vector3 headCenter = transform.InverseTransformPoint(headsetCamera.transform.position);
         Vector3 bodyCenter = transform.InverseTransformPoint(body.position);
 
+        // Set the height (TODO: this might not be necessary)
         characterController.height = headsetCamera.transform.position.y - transform.position.y;
+
+        // Figure out how far away the body is from the head - as the body is constrained by physics
+        // this will let us know if the player is moving away from game-physics limits (e.g. leaning)
+        // over a wall.
         float distance = Vector3.Distance(new Vector3(bodyCenter.x, 0, bodyCenter.z), 
                                           new Vector3(headCenter.x, 0, headCenter.z));
 
         if (distance > maxLean) {
-            // Might need to blank out the display to prevent jerkiness, but the jerkiness
+            // If the player is leaning too far, move the character controller towards the head. As
+            // the controller is bound by physics, if this causes the controller to move into a wall,
+            // the physics system will push the controller back, bringing the head with it.
+            // 
+            // Might need to blank out the display and/or prevent jerkiness, but the jerkiness
             // probably helps motion sickness
             float overage = distance - maxLean;
-            Vector3 controllerDestination = new Vector3(headCenter.x, characterController.height / 2f, headCenter.z);
             characterController.center = Vector3.Lerp(
                 characterController.center, 
-                controllerDestination,
+                new Vector3(headCenter.x, characterController.height / 2f, headCenter.z),
                 overage / distance);
         } else {
             characterController.center = new Vector3(bodyCenter.x, characterController.height / 2f, bodyCenter.z); 
@@ -155,8 +165,7 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
         // Gravity
         characterController.Move(new Vector3(0, gravity, 0) * Time.deltaTime);
 
@@ -166,7 +175,6 @@ public class Player : MonoBehaviour
 
         RotatePlayer();
         MovePlayer();
-        
     }
 
     void FixedUpdate() {

@@ -17,6 +17,16 @@ namespace UnityEngine.XR.Interaction.Toolkit
         List<XRBaseInteractable> m_ValidTargets = new List<XRBaseInteractable>();
         protected override List<XRBaseInteractable> ValidTargets { get { return m_ValidTargets; } }
         
+
+        // Working variables; used by ConeCastAll
+        private Collider[] sphereCastHits;
+        private List<Collider> coneCastHitList;
+        private Collider[] coneCastResults;
+
+        // Working variables; used by GetValidTargets
+        private List<XRBaseInteractable> targetsToTest;
+        private Collider[] coneCastHits;
+
         protected override void Awake() {
             base.Awake();
             if (!GetComponents<Collider>().Any(x => x.isTrigger))
@@ -64,11 +74,10 @@ namespace UnityEngine.XR.Interaction.Toolkit
             if (outline != null) outline.enabled = false;
         }
 
-        // from https://github.com/walterellisfun/ConeCast
         public Collider[] ConeCastAll(Vector3 origin, float radius, Vector3 direction, float coneAngle)
         {
-            Collider[] sphereCastHits = Physics.OverlapSphere(origin, radius);
-            List<Collider> coneCastHitList = new List<Collider>();
+            sphereCastHits = Physics.OverlapSphere(origin, radius);
+            coneCastHitList = new List<Collider>();
             
             if (sphereCastHits.Length > 0)
             {
@@ -86,10 +95,10 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 }
             }
 
-            Collider[] coneCastHits = new Collider[coneCastHitList.Count];
-            coneCastHits = coneCastHitList.ToArray();
+            coneCastResults = new Collider[coneCastHitList.Count];
+            coneCastResults = coneCastHitList.ToArray();
 
-            return coneCastHits;
+            return coneCastResults;
         }
 
         void FixedUpdate() {
@@ -106,13 +115,12 @@ namespace UnityEngine.XR.Interaction.Toolkit
             // TODO: this isn't the best place to do this - it's likely very inefficient; it might be
             // better to do magnetism separately from grabbing (ie more like Alyx where propulsion and
             // grabbing are different things)
-            List<XRBaseInteractable> targetsToTest = new List<XRBaseInteractable>(m_ValidTargets);
+            targetsToTest = new List<XRBaseInteractable>(m_ValidTargets);
 
-            Collider[] coneCastHits = ConeCastAll(transform.position, 1.5f, (isLeftHand ? transform.right : -transform.right), 45f);
+            coneCastHits = ConeCastAll(transform.position, 1.5f, (isLeftHand ? transform.right : -transform.right), 45f);
             foreach(var obj in coneCastHits) {
                 Grip grip;
                 if (obj.gameObject.TryGetComponent<Grip>(out grip)) {
-                    Debug.Log(grip);
                     if (grip.IsMagneticallyGrabbable()) {
                         targetsToTest.Add(grip);
                         continue;

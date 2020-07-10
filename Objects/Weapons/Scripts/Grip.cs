@@ -59,16 +59,6 @@ public class Grip : XRBaseInteractable, Grabbable
         return true;
     }
 
-    /*
-    protected virtual void Activate(XRBaseInteractor handInteractor) {
-        parentObject.GripActivated(this);
-    }
-
-    protected virtual void Deactivate(XRBaseInteractor handInteractor) {
-        parentObject.GripDeactivated(this);
-    }
-    */
-
     protected virtual void Grab(XRBaseInteractor handInteractor) {
         if (interactor) return;
        

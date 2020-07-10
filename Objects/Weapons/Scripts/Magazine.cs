@@ -14,13 +14,11 @@ public class Magazine : XRGrabInteractable, Grabbable
     public int capacity = 30;
     public int bullets = 30;
 
-    // Start is called before the first frame update
-    void Start()
+    protected override void Awake()
     {
-        Init();
-    }
-
-    void Init() {
+        base.Awake();
+        // TODO: figure out why this can't be in Awake();
+        
         rigidBody = GetComponent<Rigidbody>();
         if (receiverAttachmentPoint == null)
             receiverAttachmentPoint = transform;
@@ -64,7 +62,6 @@ public class Magazine : XRGrabInteractable, Grabbable
     }
 
     void AffixToReceiver() {
-        Init(); // This might get called before we've Started()
         DisableRigidbody();
 
         transform.SetParent(receiver.attachmentPoint);

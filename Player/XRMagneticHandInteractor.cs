@@ -11,13 +11,16 @@ namespace UnityEngine.XR.Interaction.Toolkit
     public class XRMagneticHandInteractor : XRBaseControllerInteractor
     {
         public bool isLeftHand = false;
+        public Transform magnetismDirection;
+        private Vector3 magnetismDirectionVector;
+        public float magnetismRadius = 1.5f;
+        public float magnetismAngle = 45f;
 
         private SphereCollider localCollider;
         // reusable list of valid targets
         List<XRBaseInteractable> m_ValidTargets = new List<XRBaseInteractable>();
         protected override List<XRBaseInteractable> ValidTargets { get { return m_ValidTargets; } }
         
-
         // Working variables; used by ConeCastAll
         private Collider[] sphereCastHits;
         private List<Collider> coneCastHitList;
@@ -38,6 +41,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 localCollider.radius = 0.15f;
                 localCollider.isTrigger = true;
             }
+
             onHoverEnter.AddListener(HoverHighlight);
             onHoverExit.AddListener(HoverUnhighlight);
         }
@@ -74,34 +78,15 @@ namespace UnityEngine.XR.Interaction.Toolkit
             if (outline != null) outline.enabled = false;
         }
 
-        public Collider[] ConeCastAll(Vector3 origin, float radius, Vector3 direction, float coneAngle)
-        {
-            sphereCastHits = Physics.OverlapSphere(origin, radius);
-            coneCastHitList = new List<Collider>();
-            
-            if (sphereCastHits.Length > 0)
-            {
-                for (int i = 0; i < sphereCastHits.Length; i++)
-                {
-                    //sphereCastHits[i].collider.gameObject.GetComponent<Renderer>().material.color = new Color(1f, 1f, 1f);
-                    Vector3 hitPoint = sphereCastHits[i].transform.position;
-                    Vector3 directionToHit = hitPoint - origin;
-                    float angleToHit = Vector3.Angle(direction, directionToHit);
-
-                    if (angleToHit < coneAngle)
-                    {
-                        coneCastHitList.Add(sphereCastHits[i]);
-                    }
-                }
-            }
-
-            coneCastResults = new Collider[coneCastHitList.Count];
-            coneCastResults = coneCastHitList.ToArray();
-
-            return coneCastResults;
+        void FixedUpdate() {
         }
 
-        void FixedUpdate() {
+        Vector3 magnetismVector() {
+            if (magnetismDirection == null) {
+                return isLeftHand ? transform.right : -transform.right;
+            } else {
+                return magnetismDirection.forward;
+            }
         }
 
         /// <summary>
@@ -112,32 +97,12 @@ namespace UnityEngine.XR.Interaction.Toolkit
         public override void GetValidTargets(List<XRBaseInteractable> outValidTargets) {
             outValidTargets.Clear();
 
-            // TODO: this isn't the best place to do this - it's likely very inefficient; it might be
-            // better to do magnetism separately from grabbing (ie more like Alyx where propulsion and
-            // grabbing are different things)
-            targetsToTest = new List<XRBaseInteractable>(m_ValidTargets);
-
-            coneCastHits = ConeCastAll(transform.position, 1.5f, (isLeftHand ? transform.right : -transform.right), 45f);
-            foreach(var obj in coneCastHits) {
-                Grip grip;
-                if (obj.gameObject.TryGetComponent<Grip>(out grip)) {
-                    if (grip.IsMagneticallyGrabbable()) {
-                        targetsToTest.Add(grip);
-                        continue;
-                    }
-                } 
-                Magazine mag;
-                if (obj.gameObject.TryGetComponent<Magazine>(out mag)) {
-                    targetsToTest.Add(mag);
-                }
-            }
-
             float minDistance = Mathf.Infinity;
             XRBaseInteractable minObject = null;
 
             // TODO, need to make this take into account proximity to the main axis so you can more easily select
             // between things
-            foreach(var interactable in targetsToTest) {
+            foreach(var interactable in m_ValidTargets) {
                 if (interactable is Grip) {
                     if (!((Grip)interactable).IsGrabbable()) {
                         continue;
@@ -152,6 +117,47 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
             if (minObject) {
                 outValidTargets.Add(minObject);
+                return;
+            } else {
+                float minAngle = 360;
+
+                // TODO: this isn't the best place to do this - it's likely very inefficient; it might be
+                // better to do magnetism separately from grabbing (ie more like Alyx where propulsion and
+                // grabbing are different things)
+                sphereCastHits = Physics.OverlapSphere(transform.position, magnetismRadius);
+                
+                if (sphereCastHits.Length > 0)
+                {
+                    for (int i = 0; i < sphereCastHits.Length; i++)
+                    {
+                        Vector3 hitPoint = sphereCastHits[i].transform.position;
+                        Vector3 directionToHit = hitPoint - transform.position;
+                        float angleToHit = Vector3.Angle(magnetismVector(), directionToHit);
+
+                        if (angleToHit < magnetismAngle && angleToHit < minAngle)
+                        {
+                            Grip grip;
+                            if (sphereCastHits[i].GetComponent<Collider>().gameObject.TryGetComponent<Grip>(out grip)) {
+                                if (grip.IsMagneticallyGrabbable()) {
+                                    minObject = grip;
+                                    minAngle = angleToHit;
+                                    continue;
+                                }
+                            } 
+                            Magazine mag;
+                            if (sphereCastHits[i].GetComponent<Collider>().gameObject.TryGetComponent<Magazine>(out mag)) {
+                                minObject = mag;
+                                minAngle = angleToHit;
+                                continue;
+                            }
+                            
+                        }
+                    }
+                }
+                if (minObject) {
+                    outValidTargets.Add(minObject);
+                    return;
+                }
             }
         }
 

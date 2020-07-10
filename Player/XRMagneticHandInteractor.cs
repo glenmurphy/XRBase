@@ -82,14 +82,11 @@ namespace UnityEngine.XR.Interaction.Toolkit
         }
 
         bool IsMagnetable(GameObject obj) {
-            Grip grip;
-            if (obj.TryGetComponent<Grip>(out grip)) {
-                if (grip.IsMagneticallyGrabbable()) {
+            Grabbable grabbable;
+            if (obj.TryGetComponent<Grabbable>(out grabbable)) {
+                if (grabbable.IsMagneticallyGrabbable()) {
                     return true;
                 }
-            } 
-            if (obj.GetComponent<Magazine>()) {
-                return true;
             }
             return false;
         }
@@ -108,7 +105,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
             // TODO, need to make this take into account proximity to the main axis so you can more easily select
             // between things
             foreach(var interactable in m_ValidTargets) {
-                if (interactable is Grip && !((Grip)interactable).IsGrabbable()) {
+                if (interactable is Grabbable && !((Grabbable)interactable).IsGrabbable()) {
                     continue;
                 }
                 float distance = interactable.GetDistanceSqrToInteractor(this);

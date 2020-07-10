@@ -25,15 +25,11 @@ namespace UnityEngine.XR.Interaction.Toolkit
         }
 
         bool IsPocketable(GameObject obj) {
-            Grip grip;
-            if (obj.TryGetComponent<Grip>(out grip)) {
-                if (grip.IsMagneticallyGrabbable()) {
+            Grabbable grabbable;
+            if (obj.TryGetComponent<Grabbable>(out grabbable)) {
+                if (grabbable.IsPocketable()) {
                     return true;
                 }
-            }
-            Magazine mag;
-            if (obj.TryGetComponent<Magazine>(out mag)) {
-                return !mag.IsHeld();
             }
             return false;
         }
@@ -44,7 +40,6 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
             Collider[] sphereCastHits = Physics.OverlapSphere(transform.position, 0.1f);
             for (int i = 0; i < sphereCastHits.Length; i++) {
-                XRBaseInteractable interactable;
                 if (IsPocketable(sphereCastHits[i].gameObject)) {
                     validTargets.Add(sphereCastHits[i].GetComponent<XRBaseInteractable>());
                 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class Grip : XRBaseInteractable
+public class Grip : XRBaseInteractable, Grabbable
 {
     public Transform attachTransform;
 
@@ -33,6 +33,11 @@ public class Grip : XRBaseInteractable
     
     public void Setup(TwoHanded parentObject) {
         this.parentObject = parentObject;
+    }
+
+    public bool IsPocketable() {
+        // TODO: Only make this work if the item was dropped recently
+        return IsMagneticallyGrabbable();
     }
 
     public bool IsMagneticallyGrabbable() {

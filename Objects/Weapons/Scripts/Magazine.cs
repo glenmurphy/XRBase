@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class Magazine : XRGrabInteractable
+public class Magazine : XRGrabInteractable, Grabbable
 {
     public Transform receiverAttachmentPoint;
     private Rigidbody rigidBody;
@@ -35,6 +35,20 @@ public class Magazine : XRGrabInteractable
         } else {
             AffixToReceiver();
         }
+    }
+
+    public bool IsPocketable() {
+        // TODO: only make this work for recently dropped items
+        return !IsHeld();
+    }
+
+    public bool IsMagneticallyGrabbable() {
+        // TODO: Only make this work if the item was dropped recently
+        return true;
+    }
+
+    public bool IsGrabbable() {
+        return true;
     }
 
     void DisableRigidbody() {

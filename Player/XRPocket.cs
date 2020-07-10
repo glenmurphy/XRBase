@@ -16,12 +16,6 @@ namespace UnityEngine.XR.Interaction.Toolkit
             base.allowSelect = true;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-            
-        }
-
         void SelectEnter(XRBaseInteractable interactable) {
             this.interactable = interactable;
         }
@@ -56,13 +50,6 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 }
             }
         }
-
-        /*
-        public override void ProcessInteractor(XRInteractionUpdateOrder.UpdatePhase updatePhase)
-        {
-            base.ProcessInteractor(updatePhase);
-        }
-        */
 
         public override bool isSelectActive {
             get { 

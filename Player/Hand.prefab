@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4399938836273177963}
   - component: {fileID: 1281628898936740995}
   - component: {fileID: 3961149599796237915}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Right Indicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,8 +27,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 369297560502290999}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.49, y: 0.03, z: 0}
-  m_LocalScale: {x: 0.18671, y: 0.18671, z: 0.18671}
+  m_LocalPosition: {x: -0.0125, y: 0, z: 0}
+  m_LocalScale: {x: 0.0074895183, y: 0.015536438, z: 0.0153414}
   m_Children: []
   m_Father: {fileID: 1005866914032766622}
   m_RootOrder: 2
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 208536214319313061}
   - component: {fileID: 408136105412887516}
   - component: {fileID: 4256436952450904708}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Up Indicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -120,8 +120,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4000919166114897835}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.489, z: 0}
-  m_LocalScale: {x: 0.18671, y: 0.18671, z: 0.18671}
+  m_LocalPosition: {x: 0, y: 0.0525, z: 0}
+  m_LocalScale: {x: 0.0153414, y: 0.0063635996, z: 0.0153414}
   m_Children: []
   m_Father: {fileID: 1005866914032766622}
   m_RootOrder: 1
@@ -198,7 +198,7 @@ GameObject:
   - component: {fileID: 9019324579585044985}
   - component: {fileID: 6068902557896963414}
   - component: {fileID: 8573042295232165332}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Hand Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -214,7 +214,7 @@ Transform:
   m_GameObject: {fileID: 4817651366963760881}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.023033053, y: 0.1057985, z: 0.17}
   m_Children: []
   m_Father: {fileID: 1005866914032766622}
   m_RootOrder: 0
@@ -288,7 +288,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1005866914032766622}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -304,7 +304,7 @@ Transform:
   m_GameObject: {fileID: 5611828654655571098}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.085456036, y: 0.085456036, z: 0.2499433}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 769514824471980882}
   - {fileID: 2131115227080814769}

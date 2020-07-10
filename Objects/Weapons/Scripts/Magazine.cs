@@ -94,7 +94,6 @@ public class Magazine : XRGrabInteractable, Grabbable
 
         if (receiver == null) {
             // Being dropped in the world
-            Debug.Log("No receiver");
             EnableRigidBody();
         } else {
             // Being dropped as part of an Attach();

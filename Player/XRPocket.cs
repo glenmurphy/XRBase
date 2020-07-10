@@ -10,7 +10,13 @@ namespace UnityEngine.XR.Interaction.Toolkit
         XRBaseInteractable interactable;
 
         protected override void Awake() {
+            // TODO: remove this; this is a workaround for how XRBaseInteractor doesn't
+            // create an XRInteractionManager if it can't find one; the Reset() method
+            // forces the creation of one with no other side-effects.
+            Reset(); 
+
             base.Awake();
+
             onSelectEnter.AddListener(SelectEnter);
             onSelectExit.AddListener(SelectExit);
             base.allowSelect = true;

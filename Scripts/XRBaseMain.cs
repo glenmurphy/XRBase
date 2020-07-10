@@ -4,13 +4,16 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 
-public class VRMain : MonoBehaviour
+public class XRBaseMain : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
     {
-        //StartCoroutine(InitXR());
         SetRoomScale();
+        if (!SmackPool.Instance) {
+            SmackPool pool = gameObject.AddComponent<SmackPool>();
+            pool.prefab = Resources.Load("Smack");
+        }
     }
 
     void SetRoomScale() {

@@ -21,7 +21,6 @@ Layer Setup
 - Create a layer named Player - it interacts with everything but itself and PlayerBodyParts
 - Create a layer named PlayerHitBox - it interacts with nothing but RayCast (so the player can be hit)
 - Create a layer named Grabbable - it interacts with everything but Player and PlayerHitBox
-
 - You want the Player and its child Body object to be on the Player layer
 - The Player Left Hand and Right Hand should be on the default layer (so they can grab stuff)
 - But! You might want the Hand on the PlayerBodyParts layer

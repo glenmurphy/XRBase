@@ -127,13 +127,21 @@ public class Player : MonoBehaviour
 
         // Figure out where the camera is
         Vector3 neckPosition = headsetCamera.transform.position - headsetCamera.transform.up * 0.25f;
+        Vector3 forwardPosition = headsetCamera.transform.position;// + headsetCamera.transform.forward * 1f;
 
         // TODO: Height
         //body.transform.localScale = new Vector3(1, headsetCamera.transform.position.y - body.transform.position.y, 1);
 
-        // Move the main/lower body
+        // Move and rotate the main/lower body
         Vector3 newPosition = new Vector3(neckPosition.x, transform.position.y, neckPosition.z);
-        body.rotation = (Quaternion.identity);
+        
+        // Rotate the body so it matches the head position relative to the body
+        Vector3 targetPostition = new Vector3(
+            forwardPosition.x,
+            body.transform.position.y, 
+            forwardPosition.z) ;
+        body.transform.LookAt(targetPostition);
+                                
         body.MovePosition(Vector3.Lerp (body.transform.position, newPosition, Time.deltaTime * 10f));
 
         // Rotate the upper body towards the head

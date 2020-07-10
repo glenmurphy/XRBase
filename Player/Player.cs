@@ -125,24 +125,35 @@ public class Player : MonoBehaviour
     void UpdateBodyPosition() {
         Rigidbody body = GetComponentInChildren<Rigidbody>();
 
-        // Figure out where the camera is
+        // Figure out where the camera is; the neck position stuff is so that the body moves back
+        // as the head bends down.
+        // 
+        // TODO - make sure this is never forward of the headset position (e.g. when looking up)
         Vector3 neckPosition = headsetCamera.transform.position - headsetCamera.transform.up * 0.25f;
-        Vector3 forwardPosition = headsetCamera.transform.position;// + headsetCamera.transform.forward * 1f;
-
+       
         // TODO: Height
         //body.transform.localScale = new Vector3(1, headsetCamera.transform.position.y - body.transform.position.y, 1);
 
-        // Move and rotate the main/lower body
+        // Move the main/lower body
         Vector3 newPosition = new Vector3(neckPosition.x, transform.position.y, neckPosition.z);
-        
-        // Rotate the body so it matches the head position relative to the body
-        Vector3 targetPostition = new Vector3(
-            forwardPosition.x,
-            body.transform.position.y, 
-            forwardPosition.z) ;
-        body.transform.LookAt(targetPostition);
-                                
         body.MovePosition(Vector3.Lerp (body.transform.position, newPosition, Time.deltaTime * 10f));
+
+        // Rotate the lower body. The way this works changes if the player is looking down (the
+        // first block), as we want the rotation to not change as the player looks at their left
+        // and right pockets, so we base the rotation on the up vector of the head. When they're
+        // looking up (the second block), we base it on the direction they're looking.
+        Quaternion desiredRotation;
+        if (headsetCamera.transform.eulerAngles.x > 10 && headsetCamera.transform.eulerAngles.x < 90) {
+            // Looking down
+            Vector3 hatPosition = headsetCamera.transform.position + headsetCamera.transform.up * 0.1f;
+            desiredRotation = Quaternion.LookRotation(new Vector3(
+                hatPosition.x - body.position.x, 0, hatPosition.z - body.position.z),
+                transform.up);
+        } else {
+            // Looking up
+            desiredRotation = Quaternion.Euler(0, headsetCamera.transform.eulerAngles.y, 0);
+        }
+        body.transform.rotation = Quaternion.Slerp(body.transform.rotation, desiredRotation, Time.deltaTime * 10f);
 
         // Rotate the upper body towards the head
         Vector3 upperBodyDirection = (neckPosition - hips.transform.position).normalized;

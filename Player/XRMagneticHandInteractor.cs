@@ -21,14 +21,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
         List<XRBaseInteractable> m_ValidTargets = new List<XRBaseInteractable>();
         protected override List<XRBaseInteractable> ValidTargets { get { return m_ValidTargets; } }
         
-        // Working variables; used by ConeCastAll
-        private Collider[] sphereCastHits;
-        private List<Collider> coneCastHitList;
-        private Collider[] coneCastResults;
-
         // Working variables; used by GetValidTargets
-        private List<XRBaseInteractable> targetsToTest;
-        private Collider[] coneCastHits;
+        private Collider[] sphereCastHits;
 
         protected override void Awake() {
             base.Awake();
@@ -49,7 +43,6 @@ namespace UnityEngine.XR.Interaction.Toolkit
         protected void OnTriggerEnter(Collider col)
         {
             XRBaseInteractable interactable = col.gameObject.GetComponent<XRBaseInteractable>();
-            //var interactable = interactionManager.TryGetInteractableForCollider(col);
             if (interactable && !m_ValidTargets.Contains(interactable))
                 m_ValidTargets.Add(interactable);
         }
@@ -57,7 +50,6 @@ namespace UnityEngine.XR.Interaction.Toolkit
         protected void OnTriggerExit(Collider col)
         {
             XRBaseInteractable interactable = col.gameObject.GetComponent<XRBaseInteractable>();
-            //var interactable = interactionManager.TryGetInteractableForCollider(col);
             if (interactable && m_ValidTargets.Contains(interactable))
                 m_ValidTargets.Remove(interactable);
         }
@@ -89,6 +81,19 @@ namespace UnityEngine.XR.Interaction.Toolkit
             }
         }
 
+        bool IsMagnetable(GameObject obj) {
+            Grip grip;
+            if (obj.TryGetComponent<Grip>(out grip)) {
+                if (grip.IsMagneticallyGrabbable()) {
+                    return true;
+                }
+            } 
+            if (obj.GetComponent<Magazine>()) {
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// Retrieve the list of interactables that this interactor could possibly interact with this frame.
         /// Unlike other Interactors, Hand Interactor only allows one interactable to be valid at a time
@@ -103,10 +108,8 @@ namespace UnityEngine.XR.Interaction.Toolkit
             // TODO, need to make this take into account proximity to the main axis so you can more easily select
             // between things
             foreach(var interactable in m_ValidTargets) {
-                if (interactable is Grip) {
-                    if (!((Grip)interactable).IsGrabbable()) {
-                        continue;
-                    }
+                if (interactable is Grip && !((Grip)interactable).IsGrabbable()) {
+                    continue;
                 }
                 float distance = interactable.GetDistanceSqrToInteractor(this);
                 if (distance < minDistance) {
@@ -115,49 +118,29 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 }
             }
 
+            // If we're not touching something with our local sphere, look for a magnetable
+            // target
+            if (!minObject) {
+                float minAngle = magnetismAngle;
+
+                sphereCastHits = Physics.OverlapSphere(transform.position, magnetismRadius);
+                
+                for (int i = 0; i < sphereCastHits.Length; i++)
+                {
+                    Vector3 directionToHit = sphereCastHits[i].transform.position - transform.position;
+                    float angleToHit = Vector3.Angle(magnetismVector(), directionToHit);
+
+                    if (angleToHit < minAngle && IsMagnetable(sphereCastHits[i].gameObject))
+                    {
+                        minObject = sphereCastHits[i].GetComponent<XRBaseInteractable>();
+                        minAngle = angleToHit;
+                    }
+                }
+            }
+
             if (minObject) {
                 outValidTargets.Add(minObject);
                 return;
-            } else {
-                float minAngle = 360;
-
-                // TODO: this isn't the best place to do this - it's likely very inefficient; it might be
-                // better to do magnetism separately from grabbing (ie more like Alyx where propulsion and
-                // grabbing are different things)
-                sphereCastHits = Physics.OverlapSphere(transform.position, magnetismRadius);
-                
-                if (sphereCastHits.Length > 0)
-                {
-                    for (int i = 0; i < sphereCastHits.Length; i++)
-                    {
-                        Vector3 hitPoint = sphereCastHits[i].transform.position;
-                        Vector3 directionToHit = hitPoint - transform.position;
-                        float angleToHit = Vector3.Angle(magnetismVector(), directionToHit);
-
-                        if (angleToHit < magnetismAngle && angleToHit < minAngle)
-                        {
-                            Grip grip;
-                            if (sphereCastHits[i].GetComponent<Collider>().gameObject.TryGetComponent<Grip>(out grip)) {
-                                if (grip.IsMagneticallyGrabbable()) {
-                                    minObject = grip;
-                                    minAngle = angleToHit;
-                                    continue;
-                                }
-                            } 
-                            Magazine mag;
-                            if (sphereCastHits[i].GetComponent<Collider>().gameObject.TryGetComponent<Magazine>(out mag)) {
-                                minObject = mag;
-                                minAngle = angleToHit;
-                                continue;
-                            }
-                            
-                        }
-                    }
-                }
-                if (minObject) {
-                    outValidTargets.Add(minObject);
-                    return;
-                }
             }
         }
 

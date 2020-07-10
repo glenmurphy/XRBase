@@ -17,7 +17,6 @@ public class Magazine : XRGrabInteractable, Grabbable
     protected override void Awake()
     {
         base.Awake();
-        // TODO: figure out why this can't be in Awake();
         
         rigidBody = GetComponent<Rigidbody>();
         if (receiverAttachmentPoint == null)

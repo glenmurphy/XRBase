@@ -49,10 +49,6 @@ public class Bullet : MonoBehaviour
     SmackPool.Instance.Create(hit.point,
             Quaternion.AngleAxis(Random.Range(0f,360f), hit.normal) * 
             Quaternion.LookRotation(hit.normal));
-    /*        
-    Instantiate(contactSmack, hit.point,
-        Quaternion.AngleAxis(Random.Range(0f,360f), hit.normal) * 
-        Quaternion.LookRotation(hit.normal));*/
     
     Destroy(this.gameObject);
   }

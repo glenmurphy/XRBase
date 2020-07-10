@@ -74,7 +74,7 @@ public class Magazine : XRGrabInteractable
     }
 
     public bool IsHeld() {
-        return (interactor != null);
+        return (interactor && interactor.GetComponent<XRMagneticHandInteractor>());
     }
 
     protected override void OnSelectExit(XRBaseInteractor handInteractor) {

@@ -36,12 +36,18 @@ public class Grip : XRBaseInteractable
     }
 
     public bool IsMagneticallyGrabbable() {
-        return (IsGrabbable() && parentObject.primaryGrip == this);
+        // Only if we're not attached to something already, and if we're the primary grip for
+        // the object we're attached to (so we can't magnetically attach slides/foregrips)
+        return (!interactor && parentObject.primaryGrip == this);
     }
 
     public bool IsGrabbable() {
         // If we're currently being held, we're not grabbable
-        if (interactor) return false;
+        if (interactor) {
+            if (interactor.GetComponent<XRPocket>())
+                return true;
+            return false;
+        }
         if (parentObject)
             return parentObject.IsGripGrabble(this);
 
@@ -77,7 +83,7 @@ public class Grip : XRBaseInteractable
     }
 
     public bool IsHeld() {
-        return (interactor != null);
+        return (interactor && interactor.GetComponent<XRMagneticHandInteractor>());
     }
 
     public XRBaseInteractor GetInteractor() {
@@ -95,7 +101,7 @@ public class Grip : XRBaseInteractable
     public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase) {
         base.ProcessInteractable(updatePhase);
         
-        if (interactor && parentObject) {
+        if (interactor && parentObject && interactor.GetComponent<XRController>()) {
             InputDevice device = interactor.GetComponent<XRController>().inputDevice;
             bool pressed;
             if (device.TryGetFeatureValue(CommonUsages.primaryButton, out pressed)) {

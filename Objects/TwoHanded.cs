@@ -55,6 +55,9 @@ public class TwoHanded : XRGrabInteractable
         if (grip == primaryGrip) {
             attachTransform = null;
             OnSelectExit(grip.GetInteractor());
+
+            // TODO: If we've been dropped into a pocket, then we need to attach ourselves to it
+            // somehow.
         }
     }
 

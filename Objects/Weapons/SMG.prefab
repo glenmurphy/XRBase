@@ -1091,8 +1091,8 @@ MonoBehaviour:
   muzzleFlash: {fileID: 0}
   fireSoundList:
   - {fileID: 8300000, guid: 6a884d4d86b467244954a0fbc44b6c49, type: 3}
-  slidePulledSound: {fileID: 8300000, guid: 71843d48b5962f54caa9f6a6a10707d2, type: 3}
-  slideForwardSound: {fileID: 8300000, guid: fe1ce7b87d98d044a90ee1ec02b1f4d1, type: 3}
+  slidePulledSound: {fileID: 8300000, guid: fe1ce7b87d98d044a90ee1ec02b1f4d1, type: 3}
+  slideForwardSound: {fileID: 8300000, guid: 71843d48b5962f54caa9f6a6a10707d2, type: 3}
   magReleaseSound: {fileID: 8300000, guid: 71843d48b5962f54caa9f6a6a10707d2, type: 3}
   magAttachedSound: {fileID: 8300000, guid: fe1ce7b87d98d044a90ee1ec02b1f4d1, type: 3}
   modeSwitchSound: {fileID: 8300000, guid: fe1ce7b87d98d044a90ee1ec02b1f4d1, type: 3}

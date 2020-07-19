@@ -37,17 +37,12 @@ public class Bullet : MonoBehaviour
         Debug.Log("Collided with " + hit.collider.name);
 
         if (hit.rigidbody) {
-            enemy = hit.collider.transform.root.gameObject;
-
-            /*
-            TODO: Move this into an interface so we don't have a dep on Enemy
-            if (Enemy) {
-                Enemy enemyComponent = enemy.GetComponent<Enemy>();
-            if (enemyComponent)
-                enemyComponent.Hit(hit, GetComponent<Rigidbody>().velocity);
-            else
-            */
-            hit.rigidbody.AddForceAtPosition(GetComponent<Rigidbody>().velocity, hit.point);
+            Hittable hittable;
+            if (hit.collider.transform.root.gameObject.TryGetComponent<Hittable>(out hittable)) {
+                hittable.Hit(hit, GetComponent<Rigidbody>().velocity);
+            } else {
+                hit.rigidbody.AddForceAtPosition(GetComponent<Rigidbody>().velocity, hit.point);
+            }
         }
         
         SmackPool.Instance.Create(hit.point,
